@@ -1,38 +1,75 @@
-const modalPicture = document.querySelector('.big-picture');
-const userPic = document.querySelector('.pictures');
-const bigPicture = document.querySelector('.big-picture__img'); // определяем картинку.
+import { postsArray } from "./data.js";
 
-/*-------данные картинки-------*/
-// const likes = bigPicture.querySelector('.likes-count').textContent;
-// const commentsCount = bigPicture.querySelector('.comments-count').textContent;
-// const commentsText = bigPicture.querySelector('.social__text').textContent;
+const modalPicture = document.querySelector(".big-picture");
+const userPic = document.querySelector(".pictures");
+const bigPicture = document.querySelector(".big-picture__img"); // определяем картинку.
+const bigPicturePreview = document.querySelector(".big-picture__preview");
+const commentsList = document.querySelector(".social__comments");
+const closeModalButton =  document.querySelector(".big-picture__cancel");
 
-/*fragment*/
 
-const commentsList = bigPicture.querySelector('.social__comments')
-
-function getComment (object) {
- commentsList.insertAdjacentHTML('afterbegin',
-  `<li class="social__comment">
-    <img
-        class="social__picture"
-        src="${this.avatar}"
-        alt="${this.name}"
-        width="35" height="35">
-    <p class="social__text">${this.message}</p>
-  </li>`
- )
+const onPopupEscapeKeydown = (evt) => {
+  if(evt.key === 'Escape') {
+    evt.preventDefault();
+    modalPicture.classList.add('hidden');
+  };
 }
 
+function getPictureInfo(object) {
+  bigPicture.insertAdjacentHTML(
+    "afterbegin",
+    `<img src="photos/${object.id}.jpg" alt="${object.description}" width="600" height="600">`
+  );
+}
+
+function getPictureDescription (object) {
+  const pictureDescription = document.querySelector('.social__header');
+  pictureDescription.insertAdjacentHTML('afterbegin',
+  `
+  <img class="social__picture" src="img/avatar-1.svg" alt="Аватар автора фотографии" width="35" height="35">
+  <p class="social__caption">${object.description}</p>
+  <p class="social__likes">Нравится <span class="likes-count">${object.likes}</span></p>
+  `
+  )
+}
+
+function getComment(object) {
+  object.comments.forEach((comment) => {
+    commentsList.insertAdjacentHTML(
+      "afterbegin",
+      `<li class="social__comment">
+    <img
+        class="social__picture"
+        src="${comment.avatar}"
+        alt="${comment.name}"
+        width="35" height="35">
+    <p class="social__text">${comment.message}</p>
+  </li>`
+    );
+  });
+}
 
 userPic.addEventListener('click', (evt) => {
-  console.log(evt.target)
-  // console.log(postsArray)
-  // modalPicture.classList.remove('hidden');
+  modalPicture.classList.remove('hidden');
+  // получаем id из сгенерированного массива, и ищем нужный эл-т.
+  let object = postsArray[evt.target.dataset.pictureCounter - 1];
+  getPictureInfo(object);
+  getPictureDescription(object);
+  getComment(object);
+
+  /* используем обработчик события при нажатии клавиши ESC на всем окне, чтобы срабатывало на всем окне */
+  document.addEventListener('keydown', onPopupEscapeKeydown);
+});
+
+
+closeModalButton.addEventListener('click', (evt) => {
+  modalPicture.classList.add('hidden');
 })
 
 
-export {getComment}
+
+
+export { getComment };
 /*
 Адрес изображения url подставьте как src изображения внутри блока .big-picture__img.
 Количество лайков likes подставьте как текстовое содержание элемента .likes-count.

@@ -72,6 +72,7 @@ function getPostsArray(number) {
   return postsArray;
 }
 
+const POSTS_COUNT = 25;
+const postsArray = getPostsArray(POSTS_COUNT)
 
-
-export {getPostsArray};
+export {postsArray};
