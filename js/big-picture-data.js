@@ -1,29 +1,64 @@
+// на данный момент модалка работает как задумывалось, но, видимо, надо разобраться с удалением обработкчика, после ее закрытия, т.к. приоткрытии popup загрузки изображения, при клике в свободную область экрана появляется попап из bigPic. Пока не разобрался в чем дело, в хроме этот обработчик почем то не виден.
+
+
+
+
+
 import { postsArray } from "./data.js";
 
 const modalPicture = document.querySelector(".big-picture");
-const userPic = document.querySelector(".pictures");
+const picturesPreview = document.querySelector(".pictures");
 const bigPicture = document.querySelector(".big-picture__img"); // определяем картинку.
-const bigPicturePreview = document.querySelector(".big-picture__preview");
 const commentsList = document.querySelector(".social__comments");
 const closeModalButton =  document.querySelector(".big-picture__cancel");
+const pictureDescription = document.querySelector('.social__header');
 
 
-const onPopupEscapeKeydown = (evt) => {
+
+/*------------------    PICTURE MODAL UTILS     ----------------------*/
+
+function clearModalMarkupPicture () {
+  commentsList.innerHTML = '';
+  bigPicture.innerHTML = '';
+  pictureDescription.innerHTML = '';
+}
+
+
+/*  Переменные, используемые в обработчиках
+(нужны для того, чтобы передать значения по ссылке, чтобы потом можно было удалить обработчик) */
+const onpictureModalEscapeKeydown = (evt) => {
   if(evt.key === 'Escape') {
     evt.preventDefault();
     modalPicture.classList.add('hidden');
+    clearModalMarkupPicture ();
   };
 }
 
+const generateMarkupBigPic = (evt) => {
+  modalPicture.classList.remove('hidden');
+  // получаем id из сгенерированного массива, и ищем нужный эл-т.
+  let object = postsArray[evt.target.dataset.pictureCounter - 1];
+  getPictureInfo(object);
+  getComment(object);
+  /* используем обработчик события при нажатии клавиши ESC на всем окне, чтобы срабатывало на всем окне */
+  document.addEventListener('keydown', onpictureModalEscapeKeydown);
+}
+
+const closeModalWindow = () => {
+  clearModalMarkupPicture();
+  modalPicture.classList.add('hidden');
+  picturesPreview.removeEventListener('click', generateMarkupBigPic);
+  // УДАЛение обработчка()
+
+}
+
+
+/* --------   ФУНКЦИИ ОБРАБОТКИ ДАННЫХ ДЛЯ ФОРМИРОВАНИЯ РАЗМЕТКИ    ---------*/
 function getPictureInfo(object) {
   bigPicture.insertAdjacentHTML(
     "afterbegin",
     `<img src="photos/${object.id}.jpg" alt="${object.description}" width="600" height="600">`
   );
-}
-
-function getPictureDescription (object) {
-  const pictureDescription = document.querySelector('.social__header');
   pictureDescription.insertAdjacentHTML('afterbegin',
   `
   <img class="social__picture" src="img/avatar-1.svg" alt="Аватар автора фотографии" width="35" height="35">
@@ -49,27 +84,35 @@ function getComment(object) {
   });
 }
 
-userPic.addEventListener('click', (evt) => {
-  modalPicture.classList.remove('hidden');
-  // получаем id из сгенерированного массива, и ищем нужный эл-т.
-  let object = postsArray[evt.target.dataset.pictureCounter - 1];
-  getPictureInfo(object);
-  getPictureDescription(object);
-  getComment(object);
 
-  /* используем обработчик события при нажатии клавиши ESC на всем окне, чтобы срабатывало на всем окне */
-  document.addEventListener('keydown', onPopupEscapeKeydown);
-});
+/*------       ОБРАБОТЧИКИ       -------*/
+picturesPreview.addEventListener('click', generateMarkupBigPic);
 
-
-closeModalButton.addEventListener('click', (evt) => {
-  modalPicture.classList.add('hidden');
-})
+closeModalButton.addEventListener('click', closeModalWindow)
 
 
 
 
-export { getComment };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*
 Адрес изображения url подставьте как src изображения внутри блока .big-picture__img.
 Количество лайков likes подставьте как текстовое содержание элемента .likes-count.
